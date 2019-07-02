@@ -31,3 +31,23 @@ ls -al：组合使用-a和-l，列出所有文件及详情信息
  -f：即使文件属性为只读，也能直接删除。（强制删除文件）
  -i：删除目录及以下所有的文件。
 rm ../file-bak:  删除上一级的文件file-bak。
+## 六、man指令：
+man 3 printf：在Linux第三套手册页查找printf的用法。
+## 七、cp指令（重要）：
+功能：复制文件或目录。
+cp file .. 把file拷贝至上一级
+cp file file-bak 拷贝一份备份。
+## 八、mv指令（重要）：
+语法：mv 源文件或目录 目标文件或目录
+功能：1.当第二个参数类型是文件时，mv命令完成文件的重命名。2.剪切。
+mv file ..  把file移至上一级目录。
+## 九、cat指令：
+功能：查看目标文件的内容。
+-b：对非空输出行编号。
+-n：对输出的所有行编号。
+-s：不输出多行空行。
+cat ../file-bak：打印上一级的file-bak
+
+echo“hello world”;//写到显示器
+echo“hello world”>file //将此内容写入文件。
+cat file//查看文件内容，也可以用vim file查看。
