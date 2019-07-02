@@ -51,3 +51,13 @@ cat ../file-bak：打印上一级的file-bak
 echo“hello world”;//写到显示器
 echo“hello world”>file //将此内容写入文件。
 cat file//查看文件内容，也可以用vim file查看。
+## 十、more指令：
+功能：也是查看文件内容。
+
+**more与cat的区别：cat用于展示小文件。文件内容太多时，more分屏展示，但不能往下上翻，只能回车。**
+## 十一、less指令：
+less也是对文件或其他输出进行分页显示的工具，应该是Linux正统查看文件内容的工具。在less里面可以有更多的搜索功能，不止可以向下搜，还可以向上搜。
+## 十二、head指令：
+功能：用来显示开头或结尾某个数量的文字区块.
+head file.txt //默认显示前10行
+head -20 file.txt//显示前20行
