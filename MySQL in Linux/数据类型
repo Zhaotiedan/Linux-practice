@@ -5,6 +5,7 @@ BIT(M) //M为指定位数，取值范围为[1,64]1
 TINYINT [UNSIGNED] //1字节整型，有符号的范围为[-128,127],无符号范围为[0,255],一般情况下默认有符号。
 BOOL //0,1代表真假
 SMALLINT [UNSIGNED] //短整型，有符号为[-2^15,2^15-1],无符号为2^16-1
+MEDIUINT //三字节
 INT [UNSIGNED] //整型，有符号为[-2^31-2^31-1],无符号为2^32-1
 BIGINT [UNSIGNED] //长整型，有符号为[-2^63-2^63-1],无符号为2^64-1
 
@@ -18,14 +19,226 @@ DECIMAL [(M,D)] [UNSIGNED]//3字节整数,M和D不能省略
 可以表示2^24种颜色，用画图看，红绿蓝全0为黑，全255为红。RGB表示法.
 
 //2.文本，二进制类
-CHAR (size)//固定长度字符串，最大为255
-VARCHAR(SIZE)//可变长度字符串，最大长度为65535
-BLOB //二进制数据
+CHAR (size)//相当于数组，固定长度字符串，最大为255。数据长度一样，使用char
+VARCHAR(SIZE)//可变长度字符串，SIZE代表最大长度。当长度未达到SIZE时，它的长度为实际长度比较节省空间。最大长度为65535（字节）。
+
+实际存储  char（4）   varchar（4）   char占用字节    varchar占用字节
+abcd       abcd          abcd         4*3=12             4*3+1=13
+A          A            A             4*3=12               3*1+1=4
+Abcde      X             X            超长                超长
+
+create table test varchar（65535）报错：
+UTF-8编码下：
+21844:VARCHAR的上限(65535-3)/1
+charset=gbk；再执行上一条语句，则在gbk编码下：
+varchar上限为32766；
+
+
+BLOB //二进制数据，任意文件
 TEXT //大文本，不支持全文索引
 
 //3.时间日期
-DATE/DATETIME
+DATE/DATETIME/TIMESTAMP;
+DATETIME:
+TIMESTAMP:时间戳。进去的时候给这个人打个时间戳，用本地现在时间-时间戳，可以得到一个人干一件事情的时间（蹲坑）
 
 //4.String类型
-ENUM
-SET
+ENUM//是一个字符串对象，在数据里几乎不用。
+create table test 7.7(sex enum('男','女'));
+insert 
+//则插入的时候1-男，2-女。其他数字插不进
+
+SET//相当于多选
+
+UTF-8：不一定是3字节，前面是0-1字节，10-2字节，110-3字节。在中文里，全设置为3字节，即在数据库里一个UTF-8占了3字节
+UNICODE 解决了编码问题
+
+汉字编码：
+BIG5:繁体，GB：简体。
+
+
+
+//两种校验规则：
+不区分的大小写：utf8_general_ci
+区分大小写：utf8_bin
+select * from TEST;
+两个规则都不能行
+
+找abc，与ABC ：输入select，则出现abc和ABC，改规则结果不变
+改database的默认属性改变对以前已经生成的表没有影响，只对后面重新生成的表有影响。
+
+//删除：
+保护数据：写脚本ctrl+A delete；ctrl+s：
+
+//查库show processlist
+看是否有人入侵
+
+//NULL
+select null<=> +数字为0/+null为1  不为空
+
+//空属性：
+insert 不加列时报错，列没有填满。和教材不一样的报错
+
+//zerofill--最大打印宽度
+show create table test：
+tinyint(4) 
+smallint(6)
+int(11)    
+bigint(20) 
+
+create table test 
+( id int(4) zerofill);
+insert      value(1,12,1000,100000)
+不满补0
+但是超过也可以打印
+
+create table tt(
+name varchar(20) not null comment'xingming',
+age int default '0'comment'nianning');
+
+MariaDB [helloworld]> show create table tt;
++-------+-----------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Table | Create Table                                                                                                                                              |
++-------+-----------------------------------------------------------------------------------------------------------------------------------------------------------+
+| tt    | CREATE TABLE `tt` (
+  `name` varchar(20) NOT NULL COMMENT 'xingming',
+  `age` int(11) DEFAULT '0' COMMENT 'nianning'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 |
++-------+-----------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+MariaDB [helloworld]> insert into tt(age) value('100');//Field 'name' does not have a default value
+MariaDB [helloworld]> insert into tt value('zss','100');
+Query OK, 1 row affected (0.01 sec)
+
+MariaDB [helloworld]> desc tt;
++-------+-------------+------+-----+---------+-------+
+| Field | Type        | Null | Key | Default | Extra |
++-------+-------------+------+-----+---------+-------+
+| name  | varchar(20) | NO   |     | NULL    |       |
+| age   | int(11)     | YES  |     | 0       |       |
++-------+-------------+------+-----+---------+-------+
+
+MariaDB [helloworld]> select * from tt;
++------+------+
+| name | age  |
++------+------+
+| zss  |  100 |
++------+------+
+
+MariaDB [helloworld]> alter table tt change age a int(10) unsigned zerofill;
+Query OK, 1 row affected (0.03 sec)                
+Records: 1  Duplicates: 0  Warnings: 0
+MariaDB [helloworld]> desc tt;
++-------+---------------------------+------+-----+---------+-------+
+| Field | Type                      | Null | Key | Default | Extra |
++-------+---------------------------+------+-----+---------+-------+
+| name  | varchar(20)               | NO   |     | NULL    |       |
+| a     | int(10) unsigned zerofill | YES  |     | NULL    |       |
++-------+---------------------------+------+-----+---------+-------+
+2 rows in set (0.00 sec)
+
+MariaDB [helloworld]> select * from tt;
++------+------------+
+| name | a          |
++------+------------+
+| zss  | 0000000100 |
++------+------------+
+1 row in set (0.00 sec)
+
+
+
+
+create table goods(
+goods_id int,
+goods_name char(20),
+unitprice int,
+category char(10),
+primary key(goods_id,goods_name));
+
+create table goods(
+goods_id int unsigned primary key auto_increment comment'商品编号'
+goods_name varchar(20) not null commit '商品名'
+unitprice float(8,2) default 100 commit '单价',
+category varchar(20) not null commit'商品类别',
+provider varchar(50) commit '供应商',
+);
+
+MariaDB [helloworld]> desc goods;
++------------+----------+------+-----+---------+-------+
+| Field      | Type     | Null | Key | Default | Extra |
++------------+----------+------+-----+---------+-------+
+| goods_id   | int(11)  | NO   | PRI | 0       |       |
+| goods_name | char(20) | NO   | PRI |         |       |
+| unitprice  | int(11)  | YES  |     | NULL    |       |
+| category   | char(10) | YES  |     | NULL    |       |
++------------+----------+------+-----+---------+-------+
+
+
+create table customer(
+customer_id int,
+name char(10) not null,
+address char(20),
+email int unique,
+sex enum('m','f'),
+card_id int,
+primary key(customer_id,name));
+
+create table customer(
+customer_id int unsigned primary key auto_increment commit '顾客号',
+name varchar(10) not null commit '姓名',
+address varchar(200) commit '住址',
+email varchar(50) unique key commit '住址',
+sex enum('m','f'),
+card_id char(18) not null unique key,
+);
+
+MariaDB [helloworld]> desc customer;
++-------------+---------------+------+-----+---------+-------+
+| Field       | Type          | Null | Key | Default | Extra |
++-------------+---------------+------+-----+---------+-------+
+| customer_id | int(11)       | NO   | PRI | 0       |       |
+| name        | char(10)      | NO   | PRI | NULL    |       |
+| address     | char(20)      | YES  |     | NULL    |       |
+| email       | int(11)       | YES  | UNI | NULL    |       |
+| sex         | enum('m','f') | YES  |     | NULL    |       |
+| card_id     | int(11)       | YES  |     | NULL    |       |
++-------------+---------------+------+-----+---------+-------+
+
+create table purchase(order_id int,
+customer_id int,
+goods_id int,
+nums int ,
+primary key(customer_id,goods_id),
+foreign key(customer_id)references customer(customer_id),
+foreign key(goods_id) references goods(goods_id));
+
+create table purchase(order_id int,
+customer_id int unsigned primary key auto_increment,
+goods_id int unsigned not null,
+nums int unsigned not null default 1,
+foreign key(customer_id)references customer(customer_id),
+foreign key(goods_id) references goods(goods_id));
+
+MariaDB [helloworld]> desc purchase;
++-------------+---------+------+-----+---------+-------+
+| Field       | Type    | Null | Key | Default | Extra |
++-------------+---------+------+-----+---------+-------+
+| order_id    | int(11) | YES  |     | NULL    |       |
+| customer_id | int(11) | NO   | PRI | 0       |       |
+| goods_id    | int(11) | NO   | PRI | 0       |       |
+| nums        | int(11) | YES  |     | NULL    |       |
++-------------+---------+------+-----+---------+-------+
+
+趙侍書
+彭雪瑩
+
+纔 才
+憂鬱的臺灣烏龜
+忧郁的台湾乌龟
+
+//mordify 只能改字段类型，不能改字段名（改它只能用change）
+改主键：alter table student add primary key （）;
+drop primary key;
+
+//插属性：after：插到某一列后面
+first：插到最前面
