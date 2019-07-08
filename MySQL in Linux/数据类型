@@ -242,3 +242,5 @@ drop primary key;
 
 //插属性：after：插到某一列后面
 first：插到最前面
+
+delete和insert都是对行进行操作，对单个数据操作用update
