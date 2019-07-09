@@ -56,22 +56,8 @@ UNICODE 解决了编码问题
 汉字编码：
 BIG5:繁体，GB：简体。
 
-
-
-//两种校验规则：
-不区分的大小写：utf8_general_ci
-区分大小写：utf8_bin
-select * from TEST;
-两个规则都不能行
-
-找abc，与ABC ：输入select，则出现abc和ABC，改规则结果不变
-改database的默认属性改变对以前已经生成的表没有影响，只对后面重新生成的表有影响。
-
 //删除：
 保护数据：写脚本ctrl+A delete；ctrl+s：
-
-//查库show processlist
-看是否有人入侵
 
 //NULL
 select null<=> +数字为0/+null为1  不为空
