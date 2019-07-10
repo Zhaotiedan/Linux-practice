@@ -1,3 +1,10 @@
 使用git --version查看你的Linux是否已经安装git。
 如果出现not found 则没有安装
 本人的为：git version 1.8.3.1。哈哈，开心。惊喜。
+
+接下来就和在windows操作下一样：
+git clone +仓库地址
+git status 查看状态
+git add . 添加
+git commit -m '添加日志'
+git push origin master 上传到远端。
