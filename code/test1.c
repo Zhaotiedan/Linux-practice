@@ -1,15 +1,11 @@
 #include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
 
-void Fun1()
-{
-  int *p=NULL;
-  *p=10;
-  printf("%d",*p);
-  printf("I love you!\n");
-  printf("I love you!\n");
-}
 int main()
 {
-  Fun1();
+  printf("无hhh");;
+  
+  //printf("%d\n",getppid());
   return 0;
 }
